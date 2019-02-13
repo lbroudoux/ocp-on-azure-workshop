@@ -4,12 +4,16 @@
 var port = process.env.PORT || 8080;
 var http = require('http');
 
+// Get fruits-catalog hostname
+var fruitsCatalogHost = process.env.FRUITS_CATALOG_HOST || 'localhost'
+
 // Connect to Redis cache server. Default to localhost.
 const redis = require('redis');
 var redisClient = redis.createClient(
   {
     'host': process.env.REDIS_HOST || 'localhost',
-    'port': process.env.REDIS_PORT || 6379
+    'port': process.env.REDIS_PORT || 6379,
+    'password': process.env.REDIS_PASSWORD || null,
   }
 );
 
@@ -69,13 +73,12 @@ app.use('/api/fruits', (request, response) => {
 
   // Create a new client span for catalog invocation.
   const headers = {};
-  const span = createClientSpan(parentSpanContext, 'fruits-catalog', 'http://localhost:8080/api/fruits');
+  const span = createClientSpan(parentSpanContext, 'fruits-catalog', 'http://' + fruitsCatalogHost+ ':8080/api/fruits');
   jaegerTracer.inject(span, FORMAT_HTTP_HEADERS, headers);
 
   // Define fruits-catalog invocation.
   var req = http.request({
-    //hostname: "localhost", port: 8080,
-    hostname: "localhost", port: 8080,
+    hostname: fruitsCatalogHost, port: 8080,
     path: '/api/fruits', method: 'GET', headers: headers
   }, function(resp) {
     // When invocation is OK.
