@@ -1,0 +1,58 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: fruits-inventory-pipeline
+metadata:
+  annotations:
+    description: Fruits Inventory Deployment Pipeline
+  name: fruits-inventory-pipeline
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: fruits-inventory-pipeline
+    labels:
+      name: fruits-inventory-pipeline
+    annotations:
+      pipeline.alpha.openshift.io/uses: '[{"name": "fruits-inventory", "namespace": "fruits-grocery-dev-${USERNAME}", "kind": "DeploymentConfig"}, {"name": "fruits-inventory", "namespace": "fruits-grocery-prod-${USERNAME}", "kind": "DeploymentConfig"}]'
+  spec:
+    triggers:
+      -
+        type: GitHub
+        github:
+          secret: secret101
+      -
+        type: Generic
+        generic:
+          secret: secret101
+    runPolicy: Serial
+    source:
+      type: None
+    strategy:
+      type: JenkinsPipeline
+      jenkinsPipelineStrategy:
+        jenkinsfile: |-
+          node ('nodejs') {
+            stage ('Build') {
+              openshiftBuild(namespace: 'fruits-grocery-dev-${USERNAME}', bldCfg: 'fruits-inventory', showBuildLogs: 'true')
+            }
+            stage ('Deploy Dev') {
+              openshiftDeploy(namespace: 'fruits-grocery-dev-${USERNAME}', depCfg:  'fruits-inventory')
+            }
+            stage ('Acceptance Tests') {
+              sleep 13
+            }
+            stage ('Promote to Prod') {
+              openshiftTag(namespace: 'fruits-grocery-dev-${USERNAME}', sourceStream:'fruits-inventory', sourceTag:'latest', destinationStream:'fruits-inventory', destinationTag:'promoteToProd')
+            }
+            stage ('Deploy Prod') {
+              openshiftDeploy(namespace: 'fruits-grocery-dev-${USERNAME}', depCfg: 'fruits-inventory')
+            }
+          }
+    output:
+    resources:
+    postCommit:
+parameters:
+- description: Your username (user01, user02, etc.)
+  name: USERNAME
+  required: true
