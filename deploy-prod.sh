@@ -1,3 +1,4 @@
+export USER=$(whoami)
 
 oc tag fruits-grocery-dev-${USER}/fruits-catalog:latest fruits-grocery-dev-${USER}/fruits-catalog:promoteToProd
 oc tag fruits-grocery-dev-${USER}/fruits-inventory:latest fruits-grocery-dev-${USER}/fruits-inventory:promoteToProd

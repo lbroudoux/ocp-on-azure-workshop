@@ -1,6 +1,9 @@
+export USER=$(whoami)
+export REDIS_HOST=a0a94d54-379f-4e8b-acdc-dba8ed75efc7.redis.cache.windows.net
+export REDIS_PASSWORD=YnEOZLJbuX9clXdIvWiKQc9I4D6Tv2JPL6iAt8EwCaY=
 
 # Create prod project
-oc new-project fruits-grocery-prod-${USER} --display-name="${USER} - Fruits Grocery - PROD"
+# oc new-project fruits-grocery-prod-${USER} --display-name="${USER} - Fruits Grocery - PROD"
 
 oc adm policy add-role-to-group system:image-puller system:serviceaccounts:fruits-grocery-prod-${USER} -n fruits-grocery-dev-${USER}
 oc policy add-role-to-user view -n fruits-grocery-prod-${USER} -z default
@@ -16,8 +19,8 @@ oc set env dc/fruits-inventory FRUITS_CATALOG_HOST=fruits-catalog
 # oc set env dc/fruits-inventory REDIS_HOST=a0a94d54-379f-4e8b-acdc-dba8ed75efc7.redis.cache.windows.net
 # oc set env dc/fruits-inventory REDIS_PASSWORD=YnEOZLJbuX9clXdIvWiKQc9I4D6Tv2JPL6iAt8EwCaY=
 oc create secret generic fruits-inventory-secret \
-  --from-literal=REDIS_HOST=a0a94d54-379f-4e8b-acdc-dba8ed75efc7.redis.cache.windows.net \
-  --from-literal=YnEOZLJbuX9clXdIvWiKQc9I4D6Tv2JPL6iAt8EwCaY=
+  --from-literal=REDIS_HOST=${REDIS_HOST} \
+  --from-literal=REDIS_PASSWORD=${REDIS_PASSWORD}
 oc set env dc/fruits-inventory --from=secret/fruits-inventory-secret
 
 oc rollout cancel dc/fruits-catalog -n fruits-grocery-prod-${USER}

@@ -3,7 +3,7 @@ Cloud Native application on OpenShift on Azure
 
 ##
 
-### Install Jaeger, Prometheus & grafana
+### Install Jaeger, Prometheus & Grafana
 
 ```
 oc new-project cockpit --display-name="Cockpit"
