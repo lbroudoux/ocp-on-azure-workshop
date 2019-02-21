@@ -1,6 +1,6 @@
-export USER=$(whoami)
-export REDIS_HOST=a0a94d54-379f-4e8b-acdc-dba8ed75efc7.redis.cache.windows.net
-export REDIS_PASSWORD=YnEOZLJbuX9clXdIvWiKQc9I4D6Tv2JPL6iAt8EwCaY=
+USER=$(whoami)
+REDIS_HOST=a0a94d54-379f-4e8b-acdc-dba8ed75efc7.redis.cache.windows.net
+REDIS_PASSWORD=YnEOZLJbuX9clXdIvWiKQc9I4D6Tv2JPL6iAt8EwCaY=
 
 # Create prod project
 # oc new-project fruits-grocery-prod-${USER} --display-name="${USER} - Fruits Grocery - PROD"
@@ -11,7 +11,8 @@ oc policy add-role-to-user view -n fruits-grocery-prod-${USER} -z default
 oc create deploymentconfig fruits-catalog --image=docker-registry.default.svc:5000/fruits-grocery-dev-${USER}/fruits-catalog:promoteToProd -n fruits-grocery-prod-${USER}
 
 # oc set env dc/fruits-catalog SPRING_DATA_MONGODB_URI=$(oc get secrets $(oc get secrets | grep credentials | awk '{print $1}') -o jsonpath="{.data.connectionString}" |base64 -D |sed -e 's/\?ssl=true/fruitsdb\?ssl=true/')
-oc create secret generic fruits-catalog-secret --from-literal=SPRING_DATA_MONGODB_URI=$(oc get secrets $(oc get secrets | grep credentials | awk '{print $1}') -o jsonpath="{.data.connectionString}" |base64 -D |sed -e 's/\?ssl=true/fruitsdb\?ssl=true/')
+# oc create secret generic fruits-catalog-secret --from-literal=SPRING_DATA_MONGODB_URI=$(oc get secrets $(oc get secrets | grep credentials | awk '{print $1}') -o jsonpath="{.data.connectionString}" |base64 -D |sed -e 's/\?ssl=true/fruitsdb\?ssl=true/')
+oc create secret generic fruits-catalog-secret --from-literal=SPRING_DATA_MONGODB_URI=$(oc get secrets $(oc get secrets | grep credentials | awk '{print $1}') -o jsonpath="{.data.connectionString}" |base64 -d |sed -e 's/\?ssl=true/fruitsdb\?ssl=true/')
 oc set env dc/fruits-catalog --from=secret/fruits-catalog-secret
 
 oc create deploymentconfig fruits-inventory --image=docker-registry.default.svc:5000/fruits-grocery-dev-${USER}/fruits-inventory:promoteToProd -n fruits-grocery-prod-${USER}

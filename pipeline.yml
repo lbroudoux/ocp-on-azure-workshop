@@ -46,7 +46,7 @@ objects:
               openshiftTag(namespace: 'fruits-grocery-dev-${USERNAME}', sourceStream:'fruits-inventory', sourceTag:'latest', destinationStream:'fruits-inventory', destinationTag:'promoteToProd')
             }
             stage ('Deploy Prod') {
-              openshiftDeploy(namespace: 'fruits-grocery-dev-${USERNAME}', depCfg: 'fruits-inventory')
+              openshiftDeploy(namespace: 'fruits-grocery-prod-${USERNAME}', depCfg: 'fruits-inventory')
             }
           }
     output:
